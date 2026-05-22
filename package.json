@@ -1,7 +1,7 @@
 {
     "name": "keil-assistant",
-    "displayName": "keil VS Code",
-    "description": "Keil 大战代码 — An assistant for Keil uVision",
+    "displayName": "%keil-assistant.displayName%",
+    "description": "%keil-assistant.description%",
     "version": "1.7.0",
     "publisher": "cl",
     "author": {
@@ -41,24 +41,24 @@
     "contributes": {
         "configuration": [
             {
-                "title": "keil VS Code",
+                "title": "%config.title%",
                 "properties": {
                     "KeilAssistant.C51.Uv4Path": {
                         "type": "string",
                         "scope": "machine",
-                        "markdownDescription": "C51 UV4.exe path",
+                        "markdownDescription": "%KeilAssistant.C51.Uv4Path.markdownDescription%",
                         "default": "null"
                     },
                     "KeilAssistant.MDK.Uv4Path": {
                         "type": "string",
                         "scope": "machine",
-                        "markdownDescription": "MDK UV4.exe path",
+                        "markdownDescription": "%KeilAssistant.MDK.Uv4Path.markdownDescription%",
                         "default": "null"
                     },
                     "KeilAssistant.Project.ExcludeList": {
                         "type": "array",
                         "scope": "resource",
-                        "markdownDescription": "uVision project file name exclude list",
+                        "markdownDescription": "%KeilAssistant.Project.ExcludeList.markdownDescription%",
                         "default": [
                             "template.uvproj",
                             "template.uvprojx"
@@ -67,25 +67,25 @@
                     "KeilAssistant.Project.FileLocationList": {
                         "type": "array",
                         "scope": "resource",
-                        "markdownDescription": "uVision project file locations",
+                        "markdownDescription": "%KeilAssistant.Project.FileLocationList.markdownDescription%",
                         "default": []
                     },
                     "KeilAssistant.PackAndGo.Author": {
                         "type": "string",
                         "scope": "resource",
-                        "markdownDescription": "Name used for the `${author}` expression in Pack and Go filenames",
+                        "markdownDescription": "%KeilAssistant.PackAndGo.Author.markdownDescription%",
                         "default": ""
                     },
                     "KeilAssistant.PackAndGo.NamePattern": {
                         "type": "string",
                         "scope": "resource",
-                        "markdownDescription": "Default name pattern for Pack and Go. Supported expressions: `${project}`, `${date}`, `${time}`, `${author}`, `${target}`",
+                        "markdownDescription": "%KeilAssistant.PackAndGo.NamePattern.markdownDescription%",
                         "default": "${project}_${date}_${time}"
                     },
                     "KeilAssistant.PackAndGo.TemplatePath": {
                         "type": "string",
                         "scope": "resource",
-                        "markdownDescription": "Custom path for storing Pack and Go templates. Leave empty to use `~/Documents/.KeilTemplates`",
+                        "markdownDescription": "%KeilAssistant.PackAndGo.TemplatePath.markdownDescription%",
                         "default": ""
                     }
                 }
@@ -93,161 +93,186 @@
         ],
         "commands": [
             {
+                "command": "project.newFromTemplate",
+                "title": "%cmd.project.newFromTemplate.title%",
+                "icon": "$(new-file)"
+            },
+            {
                 "command": "explorer.open",
-                "title": "打开 Keil 项目",
+                "title": "%cmd.explorer.open.title%",
                 "icon": "$(folder-opened)"
             },
             {
                 "command": "project.switch",
-                "title": "切换 Target",
+                "title": "%cmd.project.switch.title%",
                 "icon": "$(arrow-swap)"
             },
             {
                 "command": "project.active",
-                "title": "激活项目"
+                "title": "%cmd.project.active.title%"
             },
             {
                 "command": "project.close",
-                "title": "关闭项目",
+                "title": "%cmd.project.close.title%",
                 "icon": "$(close)"
             },
             {
                 "command": "project.build",
-                "title": "全量编译",
+                "title": "%cmd.project.build.title%",
                 "icon": "$(check-all)"
             },
             {
                 "command": "project.rebuild",
-                "title": "增量编译",
+                "title": "%cmd.project.rebuild.title%",
                 "icon": "$(check)"
             },
             {
                 "command": "project.download",
-                "title": "烧录到设备",
+                "title": "%cmd.project.download.title%",
                 "icon": "$(download)"
             },
             {
                 "command": "item.copyValue",
-                "title": "复制路径",
+                "title": "%cmd.item.copyValue.title%",
                 "icon": "$(copy)"
             },
             {
                 "command": "project.addFile",
-                "title": "添加文件",
+                "title": "%cmd.project.addFile.title%",
                 "icon": "$(file-add)"
             },
             {
                 "command": "project.addFile.c",
-                "title": "C 语言文件(.c)",
+                "title": "%cmd.project.addFile.c.title%",
                 "icon": "$(file-code)"
             },
             {
                 "command": "project.addFile.cpp",
-                "title": "C++ 语言文件(.cpp)",
+                "title": "%cmd.project.addFile.cpp.title%",
                 "icon": "$(file-code)"
             },
             {
                 "command": "project.addFile.asm",
-                "title": "汇编文件(.s)",
+                "title": "%cmd.project.addFile.asm.title%",
                 "icon": "$(file-binary)"
             },
             {
                 "command": "project.addFile.asmPreprocess",
-                "title": "C语言预处理汇编文件(.S)",
+                "title": "%cmd.project.addFile.asmPreprocess.title%",
                 "icon": "$(file-binary)"
             },
             {
                 "command": "project.addFile.header",
-                "title": "C/C++ 头文件(.h)",
+                "title": "%cmd.project.addFile.header.title%",
                 "icon": "$(symbol-key)"
             },
             {
                 "command": "project.addFile.text",
-                "title": "文本文件(.txt)",
+                "title": "%cmd.project.addFile.text.title%",
                 "icon": "$(file-text)"
             },
             {
                 "command": "project.addFile.other",
-                "title": "其他(.*)",
+                "title": "%cmd.project.addFile.other.title%",
                 "icon": "$(file-add)"
             },
             {
+                "command": "project.addFile.folder",
+                "title": "%cmd.project.addFile.folder.title%",
+                "icon": "$(folder)"
+            },
+            {
                 "command": "project.importFile",
-                "title": "导入文件…",
+                "title": "%cmd.project.importFile.title%",
                 "icon": "$(folder-opened)"
             },
             {
                 "command": "project.toggleHeaderDeps",
-                "title": "切换头文件依赖关系"
+                "title": "%cmd.project.toggleHeaderDeps.title%"
             },
             {
                 "command": "project.showHeaderDeps",
-                "title": "显示 头文件依赖关系",
+                "title": "%cmd.project.showHeaderDeps.title%",
                 "icon": "$(eye)"
             },
             {
                 "command": "project.hideHeaderDeps",
-                "title": "隐藏 头文件依赖关系",
+                "title": "%cmd.project.hideHeaderDeps.title%",
                 "icon": "$(eye-closed)"
             },
             {
                 "command": "project.deleteFile",
-                "title": "删除文件",
+                "title": "%cmd.project.deleteFile.title%",
                 "icon": "$(trash)"
             },
             {
                 "command": "project.packAndGo",
-                "title": "Pack and Go",
+                "title": "%cmd.project.packAndGo.title%",
                 "icon": "$(file-zip)"
             },
             {
                 "command": "functionTreeView.refresh",
-                "title": "刷新函数列表",
+                "title": "%cmd.functionTreeView.refresh.title%",
                 "icon": "$(refresh)"
             },
             {
                 "command": "functionTreeView.goto",
-                "title": "跳转到定义"
+                "title": "%cmd.functionTreeView.goto.title%"
             },
             {
                 "command": "functionTreeView.search",
-                "title": "搜索函数…",
+                "title": "%cmd.functionTreeView.search.title%",
                 "icon": "$(search)"
             },
             {
                 "command": "project.toggleFileHeaderDeps",
-                "title": "切换 依赖关系显示"
+                "title": "%cmd.project.toggleFileHeaderDeps.title%"
             },
             {
                 "command": "project.toggleGroupHeaderDeps",
-                "title": "切换 依赖关系显示"
+                "title": "%cmd.project.toggleGroupHeaderDeps.title%"
             },
             {
                 "command": "keilSettings.edit",
-                "title": "Edit Keil Setting",
+                "title": "%cmd.keilSettings.edit.title%",
                 "icon": "$(edit)"
             },
             {
                 "command": "keilSettings.refresh",
-                "title": "Refresh Keil Settings",
+                "title": "%cmd.keilSettings.refresh.title%",
                 "icon": "$(refresh)"
             },
             {
                 "command": "keilSettings.switchTarget",
-                "title": "Switch Target",
+                "title": "%cmd.keilSettings.switchTarget.title%",
                 "icon": "$(arrow-swap)"
             },
             {
                 "command": "keilSettings.loadFromProject",
-                "title": "Load From Active Project",
+                "title": "%cmd.keilSettings.loadFromProject.title%",
                 "icon": "$(cloud-download)"
             }
         ],
         "menus": {
             "view/title": [
                 {
+                    "command": "project.newFromTemplate",
+                    "group": "navigation@1",
+                    "when": "view == project"
+                },
+                {
                     "command": "explorer.open",
-                    "group": "navigation",
+                    "group": "navigation@2",
+                    "when": "view == project"
+                },
+                {
+                    "command": "project.packAndGo",
+                    "group": "navigation@3",
+                    "when": "view == project"
+                },
+                {
+                    "command": "project.switch",
+                    "group": "navigation@4",
                     "when": "view == project"
                 },
                 {
@@ -277,23 +302,6 @@
                 }
             ],
             "view/item/context": [
-                {
-                    "command": "project.switch",
-                    "group": "inline",
-                    "when": "viewItem == Project"
-                },
-                {
-                    "command": "project.active",
-                    "when": "viewItem == Project"
-                },
-                {
-                    "command": "project.close",
-                    "when": "viewItem == Project"
-                },
-                {
-                    "command": "project.packAndGo",
-                    "when": "viewItem == Project"
-                },
                 {
                     "command": "project.build",
                     "group": "inline",
@@ -337,12 +345,12 @@
                 {
                     "submenu": "keilAddFile",
                     "group": "3_add@1",
-                    "when": "viewItem == FileGroup"
+                    "when": "viewItem == FileGroup || viewItem == Target"
                 },
                 {
                     "command": "project.importFile",
                     "group": "3_add@2",
-                    "when": "viewItem == FileGroup"
+                    "when": "viewItem == FileGroup || viewItem == Target"
                 },
                 {
                     "command": "project.build",
@@ -417,13 +425,17 @@
                 {
                     "command": "project.addFile.other",
                     "group": "7_other"
+                },
+                {
+                    "command": "project.addFile.folder",
+                    "group": "8_folder"
                 }
             ]
         },
         "submenus": [
             {
                 "id": "keilAddFile",
-                "label": "添加…"
+                "label": "%submenu.keilAddFile.label%"
             }
         ],
         "keybindings": [
@@ -475,18 +487,21 @@
             "explorer": [
                 {
                     "id": "project",
-                    "name": "Keil uVision Project",
-                    "icon": "$(folder)"
+                    "name": "%view.project.name%",
+                    "icon": "$(folder)",
+                    "when": "keilAssistant.hasProject"
                 },
                 {
                     "id": "functionTreeView",
-                    "name": "函数列表",
-                    "icon": "$(list-tree)"
+                    "name": "%view.functionTreeView.name%",
+                    "icon": "$(list-tree)",
+                    "when": "keilAssistant.hasProject"
                 },
                 {
                     "id": "keilSettings",
-                    "name": "Keil 项目设置",
-                    "icon": "$(settings)"
+                    "name": "%view.keilSettings.name%",
+                    "icon": "$(settings)",
+                    "when": "keilAssistant.hasProject"
                 }
             ]
         },

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as xml2js from 'xml2js';
+import { t } from './i18n';
 
 /**
  * Keil 项目设置项侧边栏 TreeDataProvider
@@ -73,12 +74,12 @@ export class KeilSettingsProvider implements vscode.TreeDataProvider<SettingItem
 
     getChildren(element?: SettingItem): SettingItem[] {
         if (!this.projectDoc) {
-            return [new SettingItem('请先打开 Keil 项目', '', vscode.TreeItemCollapsibleState.None)];
+            return [new SettingItem(t('ks.noProject'), '', vscode.TreeItemCollapsibleState.None)];
         }
 
         const targetDOM = this.getTargetDOM();
         if (!targetDOM) {
-            return [new SettingItem('无法读取 Target 配置', '', vscode.TreeItemCollapsibleState.None)];
+            return [new SettingItem(t('ks.noTarget'), '', vscode.TreeItemCollapsibleState.None)];
         }
 
         if (!element) {
@@ -92,13 +93,13 @@ export class KeilSettingsProvider implements vscode.TreeDataProvider<SettingItem
     /** 获取根分类 */
     private getRootCategories(targetDOM: any): SettingItem[] {
         return [
-            new CategoryItem('📋 目标信息', 'targetInfo', vscode.TreeItemCollapsibleState.Expanded),
-            new CategoryItem('⚙️ C/C++ 编译器', 'cCompiler', vscode.TreeItemCollapsibleState.Collapsed),
-            new CategoryItem('🔧 汇编器', 'assembler', vscode.TreeItemCollapsibleState.Collapsed),
-            new CategoryItem('🔗 链接器', 'linker', vscode.TreeItemCollapsibleState.Collapsed),
-            new CategoryItem('📤 输出设置', 'output', vscode.TreeItemCollapsibleState.Collapsed),
-            new CategoryItem('💾 存储器布局', 'memory', vscode.TreeItemCollapsibleState.Collapsed),
-            new CategoryItem('🐞 调试/烧录', 'debug', vscode.TreeItemCollapsibleState.Collapsed),
+            new CategoryItem(t('ks.cat.targetInfo'), 'targetInfo', vscode.TreeItemCollapsibleState.Expanded),
+            new CategoryItem(t('ks.cat.cCompiler'), 'cCompiler', vscode.TreeItemCollapsibleState.Collapsed),
+            new CategoryItem(t('ks.cat.assembler'), 'assembler', vscode.TreeItemCollapsibleState.Collapsed),
+            new CategoryItem(t('ks.cat.linker'), 'linker', vscode.TreeItemCollapsibleState.Collapsed),
+            new CategoryItem(t('ks.cat.output'), 'output', vscode.TreeItemCollapsibleState.Collapsed),
+            new CategoryItem(t('ks.cat.memory'), 'memory', vscode.TreeItemCollapsibleState.Collapsed),
+            new CategoryItem(t('ks.cat.debug'), 'debug', vscode.TreeItemCollapsibleState.Collapsed),
         ];
     }
 
@@ -216,13 +217,13 @@ function getTargetInfoItems(targetDOM: any): SettingItem[] {
     const items: SettingItem[] = [];
     const tco = ['TargetOption', 'TargetCommonOption'];
 
-    items.push(readonlyItem('Target 名称', targetDOM['TargetName'] || ''));
-    items.push(readonlyItem('芯片型号 (Device)', getNested(targetDOM, ...tco, 'Device') || ''));
-    items.push(readonlyItem('厂商 (Vendor)', getNested(targetDOM, ...tco, 'Vendor') || ''));
-    items.push(readonlyItem('CPU', extractText(getNested(targetDOM, ...tco, 'Cpu')) || ''));
-    items.push(readonlyItem('Pack ID', getNested(targetDOM, ...tco, 'PackID') || ''));
-    items.push(readonlyItem('编译器版本', getNested(targetDOM, 'pCCUsed') || ''));
-    items.push(readonlyItem('使用 ARMClang V6', targetDOM['uAC6'] === '1' ? '是' : '否'));
+    items.push(readonlyItem(t('ks.label.targetName'), targetDOM['TargetName'] || ''));
+    items.push(readonlyItem(t('ks.label.device'), getNested(targetDOM, ...tco, 'Device') || ''));
+    items.push(readonlyItem(t('ks.label.vendor'), getNested(targetDOM, ...tco, 'Vendor') || ''));
+    items.push(readonlyItem(t('ks.label.cpu'), extractText(getNested(targetDOM, ...tco, 'Cpu')) || ''));
+    items.push(readonlyItem(t('ks.label.packId'), getNested(targetDOM, ...tco, 'PackID') || ''));
+    items.push(readonlyItem(t('ks.label.compilerVersion'), getNested(targetDOM, 'pCCUsed') || ''));
+    items.push(readonlyItem(t('ks.label.useArmClang'), targetDOM['uAC6'] === '1' ? '是' : '否'));
 
     return items;
 }
@@ -235,37 +236,37 @@ function getCCompilerItems(targetDOM: any): SettingItem[] {
         const base = ['TargetOption', 'TargetArmAds', 'Cads'];
         const cads = getNested(targetDOM, ...base);
         if (cads) {
-            items.push(editable('优化等级 (-O)', cads['Optim'] || '1', [...base, 'Optim'], 'number'));
-            items.push(editable('优化时间优先', cads['oTime'] === '1' ? '是' : '否', [...base, 'oTime'], 'boolean'));
-            items.push(editable('警告等级', cads['wLevel'] || '2', [...base, 'wLevel'], 'number'));
-            items.push(editable('C99 模式', cads['uC99'] === '1' ? '是' : '否', [...base, 'uC99'], 'boolean'));
-            items.push(editable('GNU 扩展', cads['uGnu'] === '1' ? '是' : '否', [...base, 'uGnu'], 'boolean'));
-            items.push(editable('严格 ANSI', cads['Strict'] === '1' ? '是' : '否', [...base, 'Strict'], 'boolean'));
-            items.push(editable('Enum 类型为 int', cads['EnumInt'] === '1' ? '是' : '否', [...base, 'EnumInt'], 'boolean'));
-            items.push(editable('One ELF Section', cads['OneElfS'] === '1' ? '是' : '否', [...base, 'OneElfS'], 'boolean'));
-            items.push(editable('Thumb 模式', cads['uThumb'] === '1' ? '是' : '否', [...base, 'uThumb'], 'boolean'));
-            items.push(editable('RTTI', cads['v6Rtti'] === '1' ? '是' : '否', [...base, 'v6Rtti'], 'boolean'));
+            items.push(editable(t('ks.label.optimization') + ' (-O)', cads['Optim'] || '1', [...base, 'Optim'], 'number'));
+            items.push(editable(t('ks.label.optTime'), cads['oTime'] === '1' ? '是' : '否', [...base, 'oTime'], 'boolean'));
+            items.push(editable(t('ks.label.warnLevel'), cads['wLevel'] || '2', [...base, 'wLevel'], 'number'));
+            items.push(editable(t('ks.label.c99'), cads['uC99'] === '1' ? '是' : '否', [...base, 'uC99'], 'boolean'));
+            items.push(editable(t('ks.label.gnuExt'), cads['uGnu'] === '1' ? '是' : '否', [...base, 'uGnu'], 'boolean'));
+            items.push(editable(t('ks.label.strictAnsi'), cads['Strict'] === '1' ? '是' : '否', [...base, 'Strict'], 'boolean'));
+            items.push(editable(t('ks.label.enumInt'), cads['EnumInt'] === '1' ? '是' : '否', [...base, 'EnumInt'], 'boolean'));
+            items.push(editable(t('ks.label.oneElf'), cads['OneElfS'] === '1' ? '是' : '否', [...base, 'OneElfS'], 'boolean'));
+            items.push(editable(t('ks.label.thumb'), cads['uThumb'] === '1' ? '是' : '否', [...base, 'uThumb'], 'boolean'));
+            items.push(editable(t('ks.label.rtti'), cads['v6Rtti'] === '1' ? '是' : '否', [...base, 'v6Rtti'], 'boolean'));
 
             const ctrlBase = [...base, 'VariousControls'];
             const ctrl = cads['VariousControls'];
             if (ctrl) {
-                items.push(editable('头文件路径 (IncludePath)', ctrl['IncludePath'] || '', [...ctrlBase, 'IncludePath']));
-                items.push(editable('宏定义 (Define)', ctrl['Define'] || '', [...ctrlBase, 'Define']));
-                items.push(editable('取消宏定义 (Undefine)', ctrl['Undefine'] || '', [...ctrlBase, 'Undefine']));
-                items.push(editable('其他编译选项 (MiscControls)', ctrl['MiscControls'] || '', [...ctrlBase, 'MiscControls']));
+                items.push(editable(t('ks.label.includePath'), ctrl['IncludePath'] || '', [...ctrlBase, 'IncludePath']));
+                items.push(editable(t('ks.label.define'), ctrl['Define'] || '', [...ctrlBase, 'Define']));
+                items.push(editable(t('ks.label.undefine'), ctrl['Undefine'] || '', [...ctrlBase, 'Undefine']));
+                items.push(editable(t('ks.label.misc'), ctrl['MiscControls'] || '', [...ctrlBase, 'MiscControls']));
             }
         }
     } else {
         const base = ['TargetOption', 'Target51', 'C51'];
         const c51 = getNested(targetDOM, ...base);
         if (c51) {
-            items.push(editable('优化等级', c51['Optim'] || '1', [...base, 'Optim'], 'number'));
-            items.push(editable('警告等级', c51['wLevel'] || '2', [...base, 'wLevel'], 'number'));
+            items.push(editable(t('ks.label.optimization'), c51['Optim'] || '1', [...base, 'Optim'], 'number'));
+            items.push(editable(t('ks.label.warnLevel'), c51['wLevel'] || '2', [...base, 'wLevel'], 'number'));
             const ctrlBase = [...base, 'VariousControls'];
             const ctrl = c51['VariousControls'];
             if (ctrl) {
-                items.push(editable('头文件路径 (IncludePath)', ctrl['IncludePath'] || '', [...ctrlBase, 'IncludePath']));
-                items.push(editable('宏定义 (Define)', ctrl['Define'] || '', [...ctrlBase, 'Define']));
+                items.push(editable(t('ks.label.includePath'), ctrl['IncludePath'] || '', [...ctrlBase, 'IncludePath']));
+                items.push(editable(t('ks.label.define'), ctrl['Define'] || '', [...ctrlBase, 'Define']));
             }
         }
     }
@@ -281,17 +282,17 @@ function getAsmItems(targetDOM: any): SettingItem[] {
         const base = ['TargetOption', 'TargetArmAds', 'Aads'];
         const aads = getNested(targetDOM, ...base);
         if (aads) {
-            items.push(editable('优化等级', aads['interw'] || '0', [...base, 'interw'], 'number'));
-            items.push(editable('Thumb 模式', aads['thumb'] === '1' ? '是' : '否', [...base, 'thumb'], 'boolean'));
-            items.push(editable('ROPI', aads['Ropi'] === '1' ? '是' : '否', [...base, 'Ropi'], 'boolean'));
-            items.push(editable('RWPI', aads['Rwpi'] === '1' ? '是' : '否', [...base, 'Rwpi'], 'boolean'));
-            items.push(editable('禁止警告', aads['NoWarn'] === '1' ? '是' : '否', [...base, 'NoWarn'], 'boolean'));
+            items.push(editable(t('ks.label.optimization'), aads['interw'] || '0', [...base, 'interw'], 'number'));
+            items.push(editable(t('ks.label.thumb'), aads['thumb'] === '1' ? '是' : '否', [...base, 'thumb'], 'boolean'));
+            items.push(editable(t('ks.label.ropi'), aads['Ropi'] === '1' ? '是' : '否', [...base, 'Ropi'], 'boolean'));
+            items.push(editable(t('ks.label.rwpi'), aads['Rwpi'] === '1' ? '是' : '否', [...base, 'Rwpi'], 'boolean'));
+            items.push(editable(t('ks.label.noWarn'), aads['NoWarn'] === '1' ? '是' : '否', [...base, 'NoWarn'], 'boolean'));
             const ctrlBase = [...base, 'VariousControls'];
             const ctrl = aads['VariousControls'];
             if (ctrl) {
-                items.push(editable('宏定义 (Define)', ctrl['Define'] || '', [...ctrlBase, 'Define']));
-                items.push(editable('头文件路径 (IncludePath)', ctrl['IncludePath'] || '', [...ctrlBase, 'IncludePath']));
-                items.push(editable('其他选项 (MiscControls)', ctrl['MiscControls'] || '', [...ctrlBase, 'MiscControls']));
+                items.push(editable(t('ks.label.define'), ctrl['Define'] || '', [...ctrlBase, 'Define']));
+                items.push(editable(t('ks.label.includePath'), ctrl['IncludePath'] || '', [...ctrlBase, 'IncludePath']));
+                items.push(editable(t('ks.label.misc'), ctrl['MiscControls'] || '', [...ctrlBase, 'MiscControls']));
             }
         }
     }
@@ -307,22 +308,22 @@ function getLinkerItems(targetDOM: any): SettingItem[] {
         const base = ['TargetOption', 'TargetArmAds', 'LDads'];
         const ldad = getNested(targetDOM, ...base);
         if (ldad) {
-            items.push(editable('散列文件 (ScatterFile)', ldad['ScatterFile'] || '', [...base, 'ScatterFile']));
-            items.push(editable('ROPI', ldad['Ropi'] === '1' ? '是' : '否', [...base, 'Ropi'], 'boolean'));
-            items.push(editable('RWPI', ldad['Rwpi'] === '1' ? '是' : '否', [...base, 'Rwpi'], 'boolean'));
-            items.push(editable('不使用标准库', ldad['noStLib'] === '1' ? '是' : '否', [...base, 'noStLib'], 'boolean'));
-            items.push(editable('代码基址 (TextAddressRange)', ldad['TextAddressRange'] || '', [...base, 'TextAddressRange']));
-            items.push(editable('数据基址 (DataAddressRange)', ldad['DataAddressRange'] || '', [...base, 'DataAddressRange']));
-            items.push(editable('额外库 (IncludeLibs)', ldad['IncludeLibs'] || '', [...base, 'IncludeLibs']));
-            items.push(editable('库搜索路径 (IncludeLibsPath)', ldad['IncludeLibsPath'] || '', [...base, 'IncludeLibsPath']));
-            items.push(editable('其他链接选项 (Misc)', ldad['Misc'] || '', [...base, 'Misc']));
+            items.push(editable(t('ks.label.scatter'), ldad['ScatterFile'] || '', [...base, 'ScatterFile']));
+            items.push(editable(t('ks.label.ropi'), ldad['Ropi'] === '1' ? '是' : '否', [...base, 'Ropi'], 'boolean'));
+            items.push(editable(t('ks.label.rwpi'), ldad['Rwpi'] === '1' ? '是' : '否', [...base, 'Rwpi'], 'boolean'));
+            items.push(editable(t('ks.label.noStdlib'), ldad['noStLib'] === '1' ? '是' : '否', [...base, 'noStLib'], 'boolean'));
+            items.push(editable(t('ks.label.textAddr'), ldad['TextAddressRange'] || '', [...base, 'TextAddressRange']));
+            items.push(editable(t('ks.label.dataAddr'), ldad['DataAddressRange'] || '', [...base, 'DataAddressRange']));
+            items.push(editable(t('ks.label.extraLib'), ldad['IncludeLibs'] || '', [...base, 'IncludeLibs']));
+            items.push(editable(t('ks.label.libPath'), ldad['IncludeLibsPath'] || '', [...base, 'IncludeLibsPath']));
+            items.push(editable(t('ks.label.linkMisc'), ldad['Misc'] || '', [...base, 'Misc']));
         }
     } else {
         const base = ['TargetOption', 'Target51', 'BL51'];
         const bl51 = getNested(targetDOM, ...base);
         if (bl51) {
-            items.push(editable('代码基址', bl51['CodeStart'] || '', [...base, 'CodeStart']));
-            items.push(editable('XDATA 基址', bl51['XDataStart'] || '', [...base, 'XDataStart']));
+            items.push(editable(t('ks.label.codeAddr'), bl51['CodeStart'] || '', [...base, 'CodeStart']));
+            items.push(editable(t('ks.label.xdataAddr'), bl51['XDataStart'] || '', [...base, 'XDataStart']));
         }
     }
 
@@ -334,10 +335,10 @@ function getOutputItems(targetDOM: any): SettingItem[] {
     const base = ['TargetOption', 'TargetCommonOption'];
     const tco = getNested(targetDOM, ...base);
     if (tco) {
-        items.push(editable('输出目录 (OutputDirectory)', tco['OutputDirectory'] || '', [...base, 'OutputDirectory']));
-        items.push(editable('输出名称 (OutputName)', tco['OutputName'] || '', [...base, 'OutputName']));
-        items.push(editable('生成可执行文件', tco['CreateExecutable'] === '1' ? '是' : '否', [...base, 'CreateExecutable'], 'boolean'));
-        items.push(editable('生成库文件', tco['CreateLib'] === '1' ? '是' : '否', [...base, 'CreateLib'], 'boolean'));
+        items.push(editable(t('ks.label.outDir'), tco['OutputDirectory'] || '', [...base, 'OutputDirectory']));
+        items.push(editable(t('ks.label.outName'), tco['OutputName'] || '', [...base, 'OutputName']));
+        items.push(editable(t('ks.label.genExec'), tco['CreateExecutable'] === '1' ? '是' : '否', [...base, 'CreateExecutable'], 'boolean'));
+        items.push(editable(t('ks.label.genLib'), tco['CreateLib'] === '1' ? '是' : '否', [...base, 'CreateLib'], 'boolean'));
         items.push(editable('生成 Hex 文件', tco['CreateHexFile'] === '1' ? '是' : '否', [...base, 'CreateHexFile'], 'boolean'));
         items.push(editable('包含调试信息', tco['DebugInformation'] === '1' ? '是' : '否', [...base, 'DebugInformation'], 'boolean'));
         items.push(editable('包含浏览信息', tco['BrowseInformation'] === '1' ? '是' : '否', [...base, 'BrowseInformation'], 'boolean'));

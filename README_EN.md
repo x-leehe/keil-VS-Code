@@ -2,8 +2,6 @@
 
 > **Keil 大战代码** 🥊 — Keil assistive tool on VS Code
 
-[![](https://vsmarketplacebadge.apphb.com/version/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)      [![](https://vsmarketplacebadge.apphb.com/installs/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)     [![](https://vsmarketplacebadge.apphb.com/downloads/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)     [![](https://vsmarketplacebadge.apphb.com/rating/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)
-
 ## Summary 📑
 
 Keil assistive tool on VS Code, used with C/C++ plug-in.
@@ -14,8 +12,6 @@ It provides syntax highlighting, code snippets for Keil projects, and supports c
 
 **Windows platform only**
 
-![preview](./res/preview/preview.png)
-
 ***
 
 ## Features 🎉
@@ -24,6 +20,11 @@ It provides syntax highlighting, code snippets for Keil projects, and supports c
 - Automatically monitor keil project files for changes and keep project views up to date
 - Compile, recompile, and burn Keil projects by calling the Keil command-line interface
 - Automatically generate c_cpp_property.json for C/C++ plug-in
+- **🎨 i18n Support**: Automatically switches between Chinese and English based on VS Code display language
+- **📄 New Project from Template**: Save existing projects as templates and create new projects with one click
+- **📦 Pack and Go**: Package projects as ZIP with customizable filenames and template saving
+- **⚙️ Keil Settings Sidebar**: View and edit Keil Target configurations directly in VS Code
+- **🔍 Function List**: Auto-scan project source files for function definitions with quick search and jump
 
 ***
 
@@ -34,8 +35,6 @@ It provides syntax highlighting, code snippets for Keil projects, and supports c
 1. Install the C/C++ plug-in
 >
 2. Go to the keil VS Code plug-in Settings and set the absolute path of the Keil executable uv4.exe
- 
- ![setting](./res/preview/setting.png)
 
 ***
 
@@ -44,44 +43,42 @@ It provides syntax highlighting, code snippets for Keil projects, and supports c
 1. Create a project on Keil, add files, header path, etc
 > 
 2. Click **Open the Project** icon or **Use Vscode to directly open the directory where keil project file (.uvproj) is located**, and the keil project will be automatically loaded by the plug-in;
- 
- ![load](./res/preview/load.png)
 
 ### Common operations
 
 - **Compile and burn**：Three buttons are provided, one for compile, one for download, and one for recompile
- 
- ![build](./res/preview/build.png)
 
 >
 
 - **Save and refresh**：Add/delete the source file, change and configure the project on Keil. Click **Save all** when the change is finished. The plug-in will automatically refresh the project when it detects the change of the Keil project
- 
- ![keil_save_all](./res/preview/keil_save_all.png)
 
 >
 
 - **Open source file**：Clicking the source file will open it in preview mode, and double-clicking the source file will switch it to non-preview mode
- 
- ![open_file](./res/preview/open_file.png)
 
 >
 
 - **Toggle the C/C++ plug-in configuration**：Click the target name to toggle between multiple C/C++ configurations
- 
- ![cpp_config](./res/preview/cpp_config.png)
 
 >
 
 - **Switch keil Target**：Click the project toggle button to toggle between multiple Keil targets
- 
- ![active_target](./res/preview/active_target.png)
 
 >
 
 - **Show reference**：After compilation is complete, you can expand the reference by clicking on the arrow icon for the source item (ARM project only)
- 
- ![show_referance](./res/preview/ref_show.png)
+
+>
+
+- **New Project from Template**: Click the 📄 toolbar button, select a template ZIP from `.KeilTemplates`, enter a project name, and quickly create a new project with automatic folder and metadata renaming.
+
+- **Pack and Go**: Right-click project → `Pack and Go`. Supports packing entire project or selecting files, saving as ZIP or storing in `.KeilTemplates`.
+
+- **Keil Settings Sidebar**: View and edit compiler, linker, output, and other Target settings directly in the `Keil Project Settings` panel.
+
+- **Function List**: The `Function List` panel auto-scans for function definitions in the project, with search and jump support.
+
+- **i18n**: Automatically detects VS Code display language for seamless Chinese/English switching.
 
 ***
 

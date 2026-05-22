@@ -9,6 +9,7 @@ import { FileWatcher } from '../lib/node_utility/FileWatcher';
 import { Time } from '../lib/node_utility/Time';
 import { IView, KeilProjectInfo, uVisonInfo } from './models';
 import { Target } from './Target';
+import { t } from './i18n';
 
 // ==============================================
 // KeilProject — 单个 Keil 工程的数据模型
@@ -57,7 +58,7 @@ export class KeilProject implements IView, KeilProjectInfo {
         this.prjID = getMD5(_uvprjFile.path);
         this.label = _uvprjFile.noSuffixName;
         this.tooltip = _uvprjFile.path;
-        this.logger.log('[info] Log at : ' + Time.GetInstance().GetTimeStamp() + '\r\n');
+        this.logger.log(t('kp.log.init', Time.GetInstance().GetTimeStamp()));
         this.watcher.OnChanged = () => {
             if (this.prevUpdateTime === undefined ||
                 this.prevUpdateTime + 2000 < Date.now()) {
@@ -82,10 +83,10 @@ export class KeilProject implements IView, KeilProjectInfo {
         } catch (err) {
             const error = err as NodeJS.ErrnoException;
             if (error.code && error.code === 'EBUSY') {
-                this.logger.log(`[Warn] uVision project file '${this.uvprjFile.name}' is locked !, delay 500 ms and retry !`);
+                this.logger.log(t('kp.log.locked', this.uvprjFile.name));
                 setTimeout(() => this.onReload(), 500);
             } else {
-                vscode.window.showErrorMessage(`reload project failed !, msg: ${error.message}`);
+                vscode.window.showErrorMessage(t('kp.reload.failed', error.message));
             }
         }
     }
@@ -118,7 +119,7 @@ export class KeilProject implements IView, KeilProjectInfo {
     close(): void {
         this.watcher.Close();
         this.targetList.forEach((target) => target.close());
-        this.logger.log('[info] project closed: ' + this.label);
+        this.logger.log(t('kp.log.closed', this.label));
     }
 
     toAbsolutePath(rePath: string): string {

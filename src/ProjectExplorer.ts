@@ -10,6 +10,7 @@ import { ResourceManager } from './ResourceManager';
 import { IView, Source, FileGroup } from './models';
 import { KeilProject } from './KeilProject';
 import { Target } from './Target';
+import { t } from './i18n';
 
 // ==============================================
 // ProjectExplorer — 工程管理器 TreeDataProvider
@@ -65,7 +66,7 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
                     try {
                         await this.openProject(uvFile.path);
                     } catch (error) {
-                        vscode.window.showErrorMessage(`open project: '${uvFile.name}' failed !, msg: ${(error as Error).message}`);
+                        vscode.window.showErrorMessage(t('pe.open.failed', uvFile.name, (error as Error).message));
                     }
                 }
             }
@@ -128,15 +129,15 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         }
     }
 
-    async switchTargetByProject(view: IView): Promise<void> {
-        const prj = this.prjList.get(view.prjID);
+    async switchTargetByProject(view?: IView): Promise<void> {
+        const prj = view ? this.prjList.get(view.prjID) : this.currentActiveProject;
         if (prj) {
             const tList = prj.getTargets();
             const targetName = await vscode.window.showQuickPick(
                 tList.map((ele: Target) => { return ele.targetName; }),
                 {
                     canPickMany: false,
-                    placeHolder: 'please select a target name for keil project'
+                    placeHolder: t('pe.switchTarget.placeHolder')
                 }
             );
             if (targetName) {
@@ -159,7 +160,7 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
             if (this.currentActiveProject) {
                 return this.currentActiveProject.getActiveTarget();
             } else {
-                vscode.window.showWarningMessage('Not found any active project !');
+                vscode.window.showWarningMessage(t('pe.noActiveProject'));
             }
         }
         return undefined;
@@ -174,10 +175,10 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
     }
 
     /** Pack and Go - 将工程目录压缩为 ZIP，支持自定义名称表达式、选择文件、保存为模板 */
-    async packAndGo(item: IView): Promise<void> {
-        const prj = this.prjList.get(item.prjID);
+    async packAndGo(item?: IView): Promise<void> {
+        const prj = item ? this.prjList.get(item.prjID) : this.currentActiveProject;
         if (!prj) {
-            vscode.window.showErrorMessage('找不到对应的 Keil 项目');
+            vscode.window.showErrorMessage(t('pe.projectNotFound'));
             return;
         }
 
@@ -188,10 +189,10 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         // ---- Step 1: 选择打包范围 ----
         const scopePick = await vscode.window.showQuickPick(
             [
-                { label: '$(package) 保存整个工程', description: '打包项目目录下的所有文件', scope: 'all' },
-                { label: '$(list-selection) 仅选择部分文件', description: '手动勾选需要打包的文件', scope: 'partial' },
+                { label: t('pe.packAndGo.scope.package'), description: t('pe.packAndGo.scope.package.desc'), scope: 'all' },
+                { label: t('pe.packAndGo.scope.partial'), description: t('pe.packAndGo.scope.partial.desc'), scope: 'partial' },
             ],
-            { placeHolder: '选择 Pack and Go 打包范围' }
+            { placeHolder: t('pe.packAndGo.scope.placeHolder') }
         );
         if (!scopePick) { return; }
 
@@ -201,12 +202,12 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         if (isPartial) {
             const allFiles = this.collectProjectFiles(projDir);
             if (allFiles.length === 0) {
-                vscode.window.showWarningMessage('项目目录下没有找到可打包的文件');
+                vscode.window.showWarningMessage(t('pe.packAndGo.noFiles'));
                 return;
             }
             const picked = await vscode.window.showQuickPick(
                 allFiles.map(f => ({ label: f.relPath, description: f.sizeKB, picked: f.isSource })),
-                { canPickMany: true, placeHolder: '选择要打包的文件（可多选）', matchOnDescription: true }
+                { canPickMany: true, placeHolder: t('pe.packAndGo.pickFiles'), matchOnDescription: true }
             );
             if (!picked || picked.length === 0) { return; }
             selectedFiles = picked.map(p => p.label);
@@ -216,10 +217,10 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         const namePattern = resMgr.getPackAndGoNamePattern();
         const resolvedExample = this.resolvePackName(namePattern, projName, prj);
         const customName = await vscode.window.showInputBox({
-            prompt: '输入 ZIP 文件名（支持表达式：${project} ${date} ${time} ${author} ${target}）',
+            prompt: t('pe.packAndGo.namePrompt'),
             value: namePattern,
-            placeHolder: `例如: ${resolvedExample}.zip`,
-            validateInput: (val: string) => val.trim() ? null : '文件名不能为空'
+            placeHolder: t('pe.packAndGo.nameExample', resolvedExample),
+            validateInput: (val: string) => val.trim() ? null : t('ext.addFile.emptyName')
         });
         if (!customName) { return; }
 
@@ -228,10 +229,10 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         // ---- Step 3: 选择保存类型（普通 / 模板） ----
         const savePick = await vscode.window.showQuickPick(
             [
-                { label: '$(folder) 保存到项目同级目录', description: '保存为普通 ZIP 包', mode: 'normal' as const },
-                { label: '$(symbol-folder) 保存为模板', description: '存入 .KeilTemplates 模板目录，供以后复用', mode: 'template' as const },
+                { label: t('pe.packAndGo.save.normal'), description: t('pe.packAndGo.save.normal.desc'), mode: 'normal' as const },
+                { label: t('pe.packAndGo.save.template'), description: t('pe.packAndGo.save.template.desc'), mode: 'template' as const },
             ],
-            { placeHolder: '选择保存方式' }
+            { placeHolder: t('pe.packAndGo.save.placeHolder') }
         );
         if (!savePick) { return; }
 
@@ -258,10 +259,10 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         // 检查是否已存在
         if (fs.existsSync(zipPath)) {
             const overwrite = await vscode.window.showWarningMessage(
-                `文件 "${resolvedName}.zip" 已存在，是否覆盖？`,
-                '覆盖', '取消'
+                t('pe.packAndGo.overwrite', resolvedName),
+                t('pe.btn.overwrite'), t('pe.btn.cancel')
             );
-            if (overwrite !== '覆盖') { return; }
+            if (overwrite !== t('pe.btn.overwrite')) { return; }
         }
 
         // ---- Step 4: 执行打包 ----
@@ -269,11 +270,11 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
             await vscode.window.withProgress(
                 {
                     location: vscode.ProgressLocation.Notification,
-                    title: 'Pack and Go',
+                    title: t('pe.packAndGo.progress.title'),
                     cancellable: false
                 },
                 async (progress) => {
-                    progress.report({ message: '正在压缩...' });
+                    progress.report({ message: t('pe.packAndGo.progress.compressing') });
 
                     const zip = new AdmZip();
                     if (isPartial && selectedFiles) {
@@ -294,15 +295,227 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
             const stat = fs.statSync(zipPath);
             const sizeMB = (stat.size / (1024 * 1024)).toFixed(2);
             const msg = isTemplate
-                ? `模板已保存！(${sizeMB} MB)\n${zipPath}`
-                : `Pack and Go 完成！(${sizeMB} MB)\n${zipPath}`;
+                ? t('pe.packAndGo.template.saved', sizeMB, zipPath)
+                : t('pe.packAndGo.normal.done', sizeMB, zipPath);
 
-            const action = await vscode.window.showInformationMessage(msg, '打开所在文件夹');
-            if (action === '打开所在文件夹') {
+            const action = await vscode.window.showInformationMessage(msg, t('pe.packAndGo.reveal'));
+            if (action === t('pe.packAndGo.reveal')) {
                 vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(zipPath));
             }
         } catch (err) {
-            vscode.window.showErrorMessage(`Pack and Go 失败: ${(err as Error).message}`);
+            vscode.window.showErrorMessage(t('pe.packAndGo.failed', (err as Error).message));
+        }
+    }
+
+    /** 从模板新建工程 —— 选择模板、定义名称、解压并重命名 */
+    async newFromTemplate(): Promise<void> {
+        const resMgr = ResourceManager.getInstance();
+
+        // ---- Step 1: 定位模板目录 ----
+        const customTemplatePath = resMgr.getPackAndGoTemplatePath();
+        let templateDir: string;
+        if (customTemplatePath) {
+            templateDir = customTemplatePath;
+        } else {
+            const homeDir = process.env.USERPROFILE || process.env.HOME || '~';
+            templateDir = node_path.join(homeDir, 'Documents', '.KeilTemplates');
+        }
+
+        if (!fs.existsSync(templateDir)) {
+            vscode.window.showWarningMessage(
+                t('pe.template.dirNotFound', templateDir)
+            );
+            return;
+        }
+
+        // ---- Step 2: 列出可用模板 ----
+        const zipFiles = fs.readdirSync(templateDir)
+            .filter(f => /\.zip$/i.test(f))
+            .map(f => {
+                const fullPath = node_path.join(templateDir, f);
+                let sizeStr = '';
+                try {
+                    const st = fs.statSync(fullPath);
+                    sizeStr = st.size < 1024 * 1024
+                        ? `${(st.size / 1024).toFixed(1)} KB`
+                        : `${(st.size / (1024 * 1024)).toFixed(1)} MB`;
+                } catch { /* ignore */ }
+                return { label: f, description: sizeStr, path: fullPath };
+            });
+
+        if (zipFiles.length === 0) {
+            vscode.window.showWarningMessage(
+                t('pe.template.noZip')
+            );
+            return;
+        }
+
+        const pickedTemplate = await vscode.window.showQuickPick(zipFiles, {
+            placeHolder: t('pe.template.pick'),
+            matchOnDescription: true
+        });
+        if (!pickedTemplate) { return; }
+
+        // ---- Step 3: 输入新工程名称 ----
+        const newProjectName = await vscode.window.showInputBox({
+            prompt: t('pe.template.namePrompt'),
+            placeHolder: t('pe.template.namePlaceholder'),
+            validateInput: (val: string) => {
+                if (!val.trim()) { return t('pe.template.nameEmpty'); }
+                if (/[<>:"/\\|?*]/.test(val)) { return t('pe.template.nameInvalid'); }
+                return null;
+            }
+        });
+        if (!newProjectName) { return; }
+
+        // ---- Step 4: 选择目标文件夹 ----
+        const targetFolderUris = await vscode.window.showOpenDialog({
+            openLabel: t('pe.template.selectDir.label'),
+            canSelectFolders: true,
+            canSelectFiles: false,
+            canSelectMany: false,
+            title: t('pe.template.selectDir.title')
+        });
+        if (!targetFolderUris || targetFolderUris.length === 0) { return; }
+
+        const targetDir = targetFolderUris[0].fsPath;
+        const newProjectDir = node_path.join(targetDir, newProjectName);
+
+        // 检查目标目录是否已存在
+        if (fs.existsSync(newProjectDir)) {
+            const overwrite = await vscode.window.showWarningMessage(
+                t('pe.template.dirExists', newProjectName),
+                { modal: true },
+                t('pe.btn.overwrite'), t('pe.btn.cancel')
+            );
+            if (overwrite !== t('pe.btn.overwrite')) { return; }
+            fs.rmSync(newProjectDir, { recursive: true, force: true });
+        }
+
+        // ---- Step 5: 解压并重命名 ----
+        try {
+            await vscode.window.withProgress(
+                {
+                    location: vscode.ProgressLocation.Notification,
+                    title: t('pe.template.progress.title'),
+                    cancellable: false
+                },
+                async (progress) => {
+                    progress.report({ message: t('pe.template.progress.extracting') });
+
+                    // 先解压到临时目录
+                    const tmpDir = node_path.join(targetDir, `.keil_tmp_${Date.now()}`);
+                    fs.mkdirSync(tmpDir, { recursive: true });
+
+                    const zip = new AdmZip(pickedTemplate.path);
+                    zip.extractAllTo(tmpDir, true);
+
+                    progress.report({ message: t('pe.template.progress.renaming') });
+
+                    // ZIP 内部结构：{oldProjectName}/file1, file2, ...
+                    const entries = fs.readdirSync(tmpDir);
+                    let oldProjectName = '';
+                    const uvprojRegex = /\.uvproj[x]?$/i;
+
+                    // 找到原始工程名（通过 ZIP 内的顶层文件夹）
+                    for (const entry of entries) {
+                        const entryPath = node_path.join(tmpDir, entry);
+                        if (fs.statSync(entryPath).isDirectory()) {
+                            oldProjectName = entry;
+                            break;
+                        }
+                    }
+
+                    if (!oldProjectName) {
+                        // 如果没有顶层文件夹，说明 ZIP 直接打包了文件
+                        // 直接将 tmpDir 重命名为目标目录
+                        fs.renameSync(tmpDir, newProjectDir);
+                    } else {
+                        const oldProjectFullPath = node_path.join(tmpDir, oldProjectName);
+
+                        // 重命名 uvproj/uvprojx 文件
+                        const projectFiles = fs.readdirSync(oldProjectFullPath)
+                            .filter(f => uvprojRegex.test(f));
+
+                        for (const pf of projectFiles) {
+                            const oldPath = node_path.join(oldProjectFullPath, pf);
+                            const ext = node_path.extname(pf);
+                            const newPf = newProjectName + ext;
+                            const newPath = node_path.join(oldProjectFullPath, newPf);
+                            fs.renameSync(oldPath, newPath);
+
+                            // 更新 uvproj/uvprojx 内的 <ProjectName> 标签
+                            try {
+                                let content = fs.readFileSync(newPath, 'utf-8');
+                                const projectNameRegex = new RegExp(
+                                    `(<ProjectName>)\\s*${oldProjectName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(</ProjectName>)`,
+                                    'gi'
+                                );
+                                content = content.replace(projectNameRegex, `$1${newProjectName}$2`);
+                                fs.writeFileSync(newPath, content, 'utf-8');
+                            } catch { /* 非 XML 格式则跳过 */ }
+                        }
+
+                        // 重命名 uvopt/uvoptx 文件（如果存在）
+                        const optFiles = fs.readdirSync(oldProjectFullPath)
+                            .filter(f => /\.uvopt[x]?$/i.test(f));
+                        for (const of of optFiles) {
+                            const oldPath = node_path.join(oldProjectFullPath, of);
+                            const ext = node_path.extname(of);
+                            const newOf = newProjectName + ext;
+                            const newPath = node_path.join(oldProjectFullPath, newOf);
+                            fs.renameSync(oldPath, newPath);
+                        }
+
+                        // 将旧工程目录重命名为新工程名
+                        const renamedOldDir = node_path.join(tmpDir, newProjectName);
+                        fs.renameSync(oldProjectFullPath, renamedOldDir);
+
+                        // 移动到目标位置
+                        fs.renameSync(renamedOldDir, newProjectDir);
+                    }
+
+                    // 清理临时目录
+                    if (fs.existsSync(tmpDir)) {
+                        try { fs.rmdirSync(tmpDir); } catch { /* ignore */ }
+                    }
+                }
+            );
+
+            const action = await vscode.window.showInformationMessage(
+                t('pe.template.created', newProjectName, newProjectDir),
+                t('pe.template.openProject'), t('pe.template.openFolder')
+            );
+
+            if (action === t('pe.template.openProject')) {
+                // 查找并打开 uvproj/uvprojx 文件
+                const uvprojRegex = /\.uvproj[x]?$/i;
+                const files = fs.readdirSync(newProjectDir)
+                    .filter(f => uvprojRegex.test(f));
+                if (files.length > 0) {
+                    const prjPath = node_path.join(newProjectDir, files[0]);
+                    await this.openProject(prjPath);
+                    const result = await vscode.window.showInformationMessage(
+                        t('pe.template.loadDone'),
+                        t('pe.template.switch'), t('pe.template.later')
+                    );
+                    if (result === t('pe.template.switch')) {
+                        vscode.commands.executeCommand(
+                            'vscode.openFolder',
+                            vscode.Uri.file(newProjectDir)
+                        );
+                    }
+                }
+            } else if (action === t('pe.template.openFolder')) {
+                vscode.commands.executeCommand(
+                    'revealFileInOS',
+                    vscode.Uri.file(newProjectDir)
+                );
+            }
+        } catch (err) {
+            vscode.window.showErrorMessage(
+                t('pe.template.failed', (err as Error).message)
+            );
         }
     }
 
@@ -369,6 +582,19 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
     }
 
     /** 向指定 FileGroup 添加新文件 */
+    /** 获取操作目标目录：FileGroup → 组名子目录，Target → 项目根目录 */
+    private getGroupDir(prj: KeilProject, item: IView): string {
+        if (item.contextVal === 'Target') {
+            return prj.uvprjFile.dir;
+        }
+        return node_path.join(prj.uvprjFile.dir, item.label);
+    }
+
+    /** 获取组名（用于更新 uvproj）：Target → 空字符串跳过更新 */
+    private getGroupName(item: IView): string {
+        return item.contextVal === 'Target' ? '' : item.label;
+    }
+
     async addFileToGroup(
         item: IView,
         suffix: string,
@@ -377,21 +603,22 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
     ): Promise<void> {
         const prj = this.prjList.get(item.prjID);
         if (!prj) {
-            vscode.window.showErrorMessage('找不到对应的 Keil 项目');
+            vscode.window.showErrorMessage(t('pe.projectNotFound'));
             return;
         }
 
+        const isTarget = item.contextVal === 'Target';
         const fileName = baseName || await vscode.window.showInputBox({
-            prompt: `新建${suffix}文件`,
-            placeHolder: `输入文件名（不含扩展名）`,
-            validateInput: (val: string) => val.trim() ? null : '文件名不能为空'
+            prompt: t('pe.addFile.prompt', suffix),
+            placeHolder: t('pe.addFile.placeHolder'),
+            validateInput: (val: string) => val.trim() ? null : t('ext.addFile.emptyName')
         });
         if (!fileName) {
             return;
         }
 
         const fullName = fileName.endsWith(suffix) ? fileName : fileName + suffix;
-        const groupDir = node_path.join(prj.uvprjFile.dir, item.label);
+        const groupDir = this.getGroupDir(prj, item);
         if (!fs.existsSync(groupDir)) {
             fs.mkdirSync(groupDir, { recursive: true });
         }
@@ -399,10 +626,10 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         const filePath = node_path.join(groupDir, fullName);
         if (fs.existsSync(filePath)) {
             const overwrite = await vscode.window.showWarningMessage(
-                `文件 "${fullName}" 已存在，是否覆盖？`,
-                '覆盖', '取消'
+                t('pe.addFile.exists', fullName),
+                t('pe.btn.overwrite'), t('pe.btn.cancel')
             );
-            if (overwrite !== '覆盖') {
+            if (overwrite !== t('pe.btn.overwrite')) {
                 return;
             }
         }
@@ -410,33 +637,64 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         const content = template ? template(fileName) : '';
         fs.writeFileSync(filePath, content, 'utf-8');
 
-        await this.updateUvprojFileList(prj, item.label, fullName, filePath);
+        if (!isTarget) {
+            await this.updateUvprojFileList(prj, item.label, fullName, filePath);
+        }
 
         try {
             await prj.onReload();
         } catch {
-            // 忽略重新加载错误，直接刷新视图
             this.updateView();
         }
 
         this.updateView();
-        vscode.window.showInformationMessage(`已创建文件: ${fullName}`);
+        vscode.window.showInformationMessage(t('pe.addFile.created', fullName));
 
         const doc = await vscode.workspace.openTextDocument(filePath);
         vscode.window.showTextDocument(doc);
+    }
+
+    /** 在 FileGroup 或 Target 下新建子文件夹 */
+    async addFolderToGroup(item: IView): Promise<void> {
+        const prj = this.prjList.get(item.prjID);
+        if (!prj) {
+            vscode.window.showErrorMessage(t('pe.projectNotFound'));
+            return;
+        }
+
+        const folderName = await vscode.window.showInputBox({
+            prompt: t('pe.addFolder.prompt'),
+            placeHolder: t('pe.addFolder.placeHolder'),
+            validateInput: (val: string) => val.trim() ? null : t('pe.template.nameEmpty')
+        });
+        if (!folderName) {
+            return;
+        }
+
+        const groupDir = this.getGroupDir(prj, item);
+        const folderPath = node_path.join(groupDir, folderName);
+
+        if (fs.existsSync(folderPath)) {
+            vscode.window.showWarningMessage(t('pe.addFolder.exists', folderName));
+            return;
+        }
+
+        fs.mkdirSync(folderPath, { recursive: true });
+        this.updateView();
+        vscode.window.showInformationMessage(t('pe.addFolder.created', folderName));
     }
 
     /** 导入外部文件到指定 FileGroup */
     async importFileToGroup(item: IView, sourcePath: string): Promise<void> {
         const prj = this.prjList.get(item.prjID);
         if (!prj) {
-            vscode.window.showErrorMessage('找不到对应的 Keil 项目');
+            vscode.window.showErrorMessage(t('pe.projectNotFound'));
             return;
         }
 
         const srcFile = new File(sourcePath);
         if (!srcFile.IsFile()) {
-            vscode.window.showErrorMessage(`找不到文件: ${sourcePath}`);
+            vscode.window.showErrorMessage(t('pe.importFile.notFound', sourcePath));
             return;
         }
 
@@ -448,10 +706,10 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         const destPath = node_path.join(groupDir, srcFile.name);
         if (fs.existsSync(destPath)) {
             const action = await vscode.window.showWarningMessage(
-                `文件 "${srcFile.name}" 已存在于目标目录，是否覆盖？`,
-                '覆盖', '跳过'
+                t('pe.importFile.exists', srcFile.name),
+                t('pe.btn.overwrite'), t('pe.importFile.skip')
             );
-            if (action === '跳过') {
+            if (action === t('pe.importFile.skip')) {
                 return;
             }
         }
@@ -469,16 +727,16 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
 
         const prj = this.prjList.get(item.prjID);
         if (!prj) {
-            vscode.window.showErrorMessage('找不到对应的 Keil 项目');
+            vscode.window.showErrorMessage(t('pe.projectNotFound'));
             return;
         }
 
         const confirm = await vscode.window.showWarningMessage(
-            `确定要删除文件 "${source.file.name}" 吗？\n此操作将从工程中移除引用（不会删除磁盘文件）。`,
+            t('pe.deleteFile.confirm', source.file.name),
             { modal: true },
-            '删除引用', '取消'
+            t('pe.deleteFile.btn'), t('pe.btn.cancel')
         );
-        if (confirm !== '删除引用') {
+        if (confirm !== t('pe.deleteFile.btn')) {
             return;
         }
 
@@ -491,7 +749,7 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         }
 
         this.updateView();
-        vscode.window.showInformationMessage(`已从工程中移除: ${source.file.name}`);
+        vscode.window.showInformationMessage(t('pe.deleteFile.done', source.file.name));
     }
 
     /** 从 .uvprojx 中移除指定文件 */
@@ -793,6 +1051,7 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
 
     updateView(): void {
         this.viewEvent.fire(undefined as unknown as IView);
+        vscode.commands.executeCommand('setContext', 'keilAssistant.hasProject', this.prjList.size > 0);
     }
 
     private itemClickInfo: { name: string; time: number } | undefined;

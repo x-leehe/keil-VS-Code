@@ -7,6 +7,7 @@ import { FileWatcher } from '../lib/node_utility/FileWatcher';
 import { CmdLineHandler } from './CmdLineHandler';
 import { ResourceManager } from './ResourceManager';
 import { IView, Source, FileGroup, KeilProjectInfo, uVisonInfo } from './models';
+import { t } from './i18n';
 
 // ==============================================
 // Target 抽象基类 + C51 / ARM 具体实现
@@ -225,7 +226,7 @@ export abstract class Target implements IView {
         args.push('-o', this.uv4LogFile.path);
         args = args.concat(commands);
 
-        const isCmd = /cmd.exe$/i.test(vscode.env.shell);
+        const isCmd = /cmd.exe$/i.test(process.env.ComSpec || 'cmd.exe');
         const quote = isCmd ? '"' : '\'';
         const invokePrefix = isCmd ? '' : '& ';
         const cmdPrefixSuffix = isCmd ? '"' : '';
@@ -330,20 +331,20 @@ export class C51Target extends Target {
     protected checkProject(target: any): Error | undefined {
         if (target['TargetOption']['Target51'] === undefined ||
             target['TargetOption']['Target51']['C51'] === undefined) {
-            return new Error(`This uVision project is not a C51 project, but have a 'uvproj' suffix !`);
+            return new Error(t('target.notC51'));
         }
         return undefined;
     }
 
-    protected parseRefLines(target: any, lines: string[]): string[] {
+    protected parseRefLines(_target: any, _lines: string[]): string[] {
         return [];
     }
 
-    protected getOutputFolder(target: any): string | undefined {
+    protected getOutputFolder(_target: any): string | undefined {
         return undefined;
     }
 
-    getSysDefines(target: any): string[] {
+    getSysDefines(_target: any): string[] {
         return [
             '__C51__',
             '__VSCODE_C51__',
@@ -370,7 +371,7 @@ export class C51Target extends Target {
         ];
     }
 
-    protected getSystemIncludes(target: any): string[] | undefined {
+    protected getSystemIncludes(_target: any): string[] | undefined {
         const exeFile = new File(ResourceManager.getInstance().getC51UV4Path());
         if (exeFile.IsFile()) {
             return [
@@ -433,7 +434,7 @@ export class C51Target extends Target {
 export class MacroHandler {
     private regMatchers: { [key: string]: RegExp } = {
         'normal_macro': /^#define (\w+) (.*)$/,
-        'func_macro': /^#define (\w+\([^\)]*\)) (.*)$/
+        'func_macro': /^#define (\w+\([^)]*\)) (.*)$/
     };
 
     toExpression(macro: string): string | undefined {
@@ -597,7 +598,7 @@ export class ArmTarget extends Target {
     protected getOutputFolder(target: any): string | undefined {
         try {
             return target['TargetOption']['TargetCommonOption']['OutputDirectory'];
-        } catch (error) {
+        } catch (_error) {
             return undefined;
         }
     }
@@ -605,9 +606,9 @@ export class ArmTarget extends Target {
     private gnu_parseRefLines(lines: string[]): string[] {
         const resultList = new Set<string>();
         for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-            let _line = lines[lineIndex];
-            let line = _line[_line.length - 1] === '\\' ? _line.substring(0, _line.length - 1) : _line;
-            let subLines = line.trim().split(/(?<![\\:]) /);
+            const _line = lines[lineIndex];
+            const line = _line[_line.length - 1] === '\\' ? _line.substring(0, _line.length - 1) : _line;
+            const subLines = line.trim().split(/(?<![\\:]) /);
             if (lineIndex === 0) {
                 for (let i = 1; i < subLines.length; i++) {
                     resultList.add(subLines[i].trim().replace(/\\ /g, " "));
@@ -624,7 +625,7 @@ export class ArmTarget extends Target {
     private ac5_parseRefLines(lines: string[], startIndex: number = 1): string[] {
         const resultList = new Set<string>();
         for (let i = startIndex; i < lines.length; i++) {
-            let sepIndex = lines[i].indexOf(": ");
+            const sepIndex = lines[i].indexOf(": ");
             if (sepIndex > 0) {
                 const line = lines[i].substring(sepIndex + 1).trim();
                 resultList.add(line);
@@ -672,7 +673,7 @@ export class ArmTarget extends Target {
                     }
                 });
             return resList;
-        } catch (error) {
+        } catch (_error) {
             return ['__GNUC__=4', '__GNUC_MINOR__=2', '__GNUC_PATCHLEVEL__=1'];
         }
     }

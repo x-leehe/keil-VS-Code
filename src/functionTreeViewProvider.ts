@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { FuncDef, scanDirectory } from './FunctionScanner';
+import { t } from './i18n';
 
 /** TreeView 节点 */
 class FuncItem extends vscode.TreeItem {
@@ -13,11 +14,11 @@ class FuncItem extends vscode.TreeItem {
     ) {
         super(label, collapsible);
         if (funcDef) {
-            this.description = `第 ${funcDef.line} 行`;
+            this.description = t('func.line', funcDef.line);
             this.tooltip = `${funcDef.signature}\n${funcDef.filePath}`;
             this.command = {
                 command: 'functionTreeView.goto',
-                title: '跳转到定义',
+                title: t('func.goto'),
                 arguments: [funcDef]
             };
             const icon = label.startsWith('#') ? 'symbol-constant'
@@ -116,7 +117,7 @@ export class FunctionTreeViewProvider implements vscode.TreeDataProvider<FuncIte
     /** QuickPick 实时搜索 */
     async search(): Promise<void> {
         if (this.funcs.length === 0) {
-            vscode.window.showInformationMessage('没有扫描到函数，请先打开 Keil 项目。');
+            vscode.window.showInformationMessage(t('func.noProject'));
             return;
         }
 
@@ -128,8 +129,8 @@ export class FunctionTreeViewProvider implements vscode.TreeDataProvider<FuncIte
         }));
 
         const quickPick = vscode.window.createQuickPick<vscode.QuickPickItem & { funcDef: FuncDef }>();
-        quickPick.title = '搜索函数';
-        quickPick.placeholder = '输入关键字过滤函数名...';
+        quickPick.title = t('func.goto');
+        quickPick.placeholder = t('func.search.placeHolder');
         quickPick.matchOnDescription = true;
         quickPick.matchOnDetail = true;
         quickPick.canSelectMany = false;
