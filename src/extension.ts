@@ -190,16 +190,6 @@ export function activate(context: vscode.ExtensionContext) {
     subscriber.push(vscode.commands.registerCommand('functionTreeView.refresh', () => functionTreeViewProvider?.refresh()));
     subscriber.push(vscode.commands.registerCommand('functionTreeView.scanFile', async (filePath: string) => { await functionTreeViewProvider?.scanFile(filePath); }));
 
-    // 监听活动编辑器变化，自动扫描当前文件
-    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
-        if (editor && functionTreeViewProvider) {
-            const filePath = editor.document.uri.fsPath;
-            const ext = node_path.extname(filePath).toLowerCase();
-            if (['.c', '.h', '.cpp', '.hpp', '.s', '.S', '.inc'].includes(ext)) {
-                functionTreeViewProvider.scanFile(filePath);
-            }
-        }
-    }));
 }
 
 function openWorkspace(wsFile: File): void {

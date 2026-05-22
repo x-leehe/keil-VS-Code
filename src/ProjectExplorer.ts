@@ -71,6 +71,7 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
                 }
             }
         }
+        this.updateView();
     }
 
     async openProject(path: string): Promise<KeilProject | undefined> {
@@ -1107,9 +1108,29 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
 
     getChildren(element?: IView): vscode.ProviderResult<IView[]> {
         if (element === undefined) {
+            if (this.prjList.size === 0) {
+                return this.getWelcomeItems();
+            }
             return Array.from(this.prjList.values());
         } else {
             return element.getChildViews();
         }
+    }
+
+    /** 欢迎页：未打开工程时显示提示文本（操作按钮在标题栏） */
+    private getWelcomeItems(): IView[] {
+        return [{
+            prjID: '__welcome__',
+            label: t('welcome.noProject'),
+            tooltip: t('welcome.noProject'),
+            contextVal: 'welcome',
+            getChildViews: () => undefined
+        }, {
+            prjID: '__welcome__',
+            label: t('welcome.hint'),
+            tooltip: t('welcome.hint'),
+            contextVal: 'welcome',
+            getChildViews: () => undefined
+        }];
     }
 }

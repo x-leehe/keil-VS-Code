@@ -10,12 +10,12 @@ type MessageDict = Record<string, string>;
 const zh: MessageDict = {
     // ---- extension.ts ----
     'ext.activated': '---- keil VS Code (Keil 大战代码) 已激活 ----',
-    'ext.openProject.label': 'Open a keil project',
-    'ext.openProject.filter': 'keil project xml',
-    'ext.openProject.done': 'keil project load done !, switch workspace ?',
-    'ext.openProject.ok': 'Ok',
-    'ext.openProject.later': 'Later',
-    'ext.openProject.failed': '打开工程失败！msg: {0}',
+    'ext.openProject.label': '打开 Keil 工程',
+    'ext.openProject.filter': 'Keil 工程文件',
+    'ext.openProject.done': 'Keil 工程加载完成！是否切换工作区？',
+    'ext.openProject.ok': '切换',
+    'ext.openProject.later': '稍后',
+    'ext.openProject.failed': '打开工程失败：{0}',
     'ext.settings.boolean.yes': '是 (1)',
     'ext.settings.boolean.no': '否 (0)',
     'ext.settings.edit.placeHolder': '设置 "{0}" (当前: {1})',
@@ -95,6 +95,11 @@ const zh: MessageDict = {
     'pe.addFolder.placeHolder': '例如: Drivers, Utils, Lib',
     'pe.addFolder.exists': '文件夹 "{0}" 已存在',
     'pe.addFolder.created': '已创建文件夹: {0}',
+
+    // ---- 欢迎页 ----
+    'welcome.noProject': '没有打开的 Keil 工程。',
+    'welcome.hint': '请打开一个工程，或从模板新建。',
+
     'pe.importFile.notFound': '找不到文件: {0}',
     'pe.importFile.exists': '文件 "{0}" 已存在于目标目录，是否覆盖？',
     'pe.importFile.skip': '跳过',
@@ -171,12 +176,12 @@ const zh: MessageDict = {
 const en: MessageDict = {
     // ---- extension.ts ----
     'ext.activated': '---- keil VS Code (Keil Assistant) activated ----',
-    'ext.openProject.label': 'Open a keil project',
-    'ext.openProject.filter': 'keil project xml',
-    'ext.openProject.done': 'keil project load done !, switch workspace ?',
-    'ext.openProject.ok': 'Ok',
+    'ext.openProject.label': 'Open Keil Project',
+    'ext.openProject.filter': 'Keil Project',
+    'ext.openProject.done': 'Keil project loaded! Switch workspace?',
+    'ext.openProject.ok': 'Switch',
     'ext.openProject.later': 'Later',
-    'ext.openProject.failed': 'Open project failed ! msg: {0}',
+    'ext.openProject.failed': 'Open project failed: {0}',
     'ext.settings.boolean.yes': 'Yes (1)',
     'ext.settings.boolean.no': 'No (0)',
     'ext.settings.edit.placeHolder': 'Setting "{0}" (current: {1})',
@@ -256,6 +261,11 @@ const en: MessageDict = {
     'pe.addFolder.placeHolder': 'e.g. Drivers, Utils, Lib',
     'pe.addFolder.exists': 'Folder "{0}" already exists',
     'pe.addFolder.created': 'Folder created: {0}',
+
+    // ---- 欢迎页 ----
+    'welcome.noProject': 'No Keil project opened.',
+    'welcome.hint': 'Please open a project or create one from a template.',
+
     'pe.importFile.notFound': 'File not found: {0}',
     'pe.importFile.exists': 'File "{0}" already exists in target directory. Overwrite?',
     'pe.importFile.skip': 'Skip',

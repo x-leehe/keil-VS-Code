@@ -24,10 +24,7 @@
         "Snippets",
         "Other"
     ],
-    "activationEvents": [
-        "workspaceContains:**/*.uvprojx",
-        "workspaceContains:**/*.uvproj"
-    ],
+    "activationEvents": ["onStartupFinished"],
     "icon": "res/icons/icon.png",
     "main": "./dist/extension.js",
     "repository": {
@@ -488,8 +485,7 @@
                 {
                     "id": "project",
                     "name": "%view.project.name%",
-                    "icon": "$(folder)",
-                    "when": "keilAssistant.hasProject"
+                    "icon": "$(folder)"
                 },
                 {
                     "id": "functionTreeView",

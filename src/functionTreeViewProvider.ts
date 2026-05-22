@@ -60,13 +60,12 @@ export class FunctionTreeViewProvider implements vscode.TreeDataProvider<FuncIte
         this._onDidChangeTreeData.fire(undefined);
     }
 
-    /** 扫描当前文件 */
+    /** 扫描当前文件（增量更新，不覆盖其他文件的扫描结果） */
     async scanFile(filePath: string): Promise<void> {
         this.loading = true;
         const results = await new Promise<FuncDef[]>((resolve) => {
             setTimeout(() => {
                 const fd: FuncDef[] = [];
-                // 使用 scanner 的单文件扫描
                 try {
                     const content = fs.readFileSync(filePath, 'utf-8');
                     const lines = content.split('\n');
@@ -85,7 +84,8 @@ export class FunctionTreeViewProvider implements vscode.TreeDataProvider<FuncIte
             }, 50);
         });
 
-        this.funcs = results;
+        // 增量更新：移除旧文件中同路径的旧结果，合并新结果
+        this.funcs = this.funcs.filter(f => f.filePath !== filePath).concat(results);
         this.loading = false;
         this._onDidChangeTreeData.fire(undefined);
     }
@@ -177,7 +177,7 @@ export class FunctionTreeViewProvider implements vscode.TreeDataProvider<FuncIte
             // 根：按文件分组
             return this.groupByFile().map(g => {
                 const fname = path.basename(g.file);
-                return new FuncItem(fname, vscode.TreeItemCollapsibleState.Expanded, undefined,
+                return new FuncItem(fname, vscode.TreeItemCollapsibleState.Collapsed, undefined,
                     g.funcs.map(f => new FuncItem(f.name, vscode.TreeItemCollapsibleState.None, f)));
             });
         }
