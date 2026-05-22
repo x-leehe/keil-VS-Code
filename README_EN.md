@@ -1,10 +1,12 @@
-# Keil Assistant
+# keil VS Code
+
+> **Keil 大战代码** 🥊 — Keil assistive tool on VS Code
 
 [![](https://vsmarketplacebadge.apphb.com/version/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)      [![](https://vsmarketplacebadge.apphb.com/installs/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)     [![](https://vsmarketplacebadge.apphb.com/downloads/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)     [![](https://vsmarketplacebadge.apphb.com/rating/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)
 
 ## Summary 📑
 
-Keil assistive tool on VScode, used with C/C++ plug-in.
+Keil assistive tool on VS Code, used with C/C++ plug-in.
 
 It provides syntax highlighting, code snippets for Keil projects, and supports compiling and downloading Keil projects.
 
@@ -31,7 +33,7 @@ It provides syntax highlighting, code snippets for Keil projects, and supports c
 
 1. Install the C/C++ plug-in
 >
-2. Go to the Keil-Assistant plug-in Settings and set the absolute path of the Keil executable uv4.exe
+2. Go to the keil VS Code plug-in Settings and set the absolute path of the Keil executable uv4.exe
  
  ![setting](./res/preview/setting.png)
 
@@ -101,4 +103,4 @@ You can go to the following places to communicate
 
 - [Discussion: https://discuss.em-ide.com/t/keil-assistant](https://discuss.em-ide.com/t/keil-assistant)
 
-- [Github Issue: https://github.com/github0null/keil-assistant/issues](https://github.com/github0null/keil-assistant/issues)
+- [Github Issue: https://github.com/x-leehe/keil-VS-Code/issues](https://github.com/x-leehe/keil-VS-Code/issues)

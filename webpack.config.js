@@ -1,11 +1,12 @@
 //@ts-check
-
 'use strict';
 
 const path = require('path');
 
+/** @type {import('webpack').Configuration} */
 const config = {
     target: 'node',
+    mode: 'none',
     entry: './src/extension.ts',
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -16,10 +17,10 @@ const config = {
     devtool: 'source-map',
     externals: {
         vscode: 'commonjs vscode',
-        xml2js: 'xml2js'
+        xml2js: 'xml2js',
+        'vscode-variables': 'commonjs vscode-variables'
     },
     resolve: {
-        // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
         extensions: ['.ts', '.js']
     },
     module: {
@@ -29,11 +30,20 @@ const config = {
                 exclude: /node_modules/,
                 use: [
                     {
-                        loader: 'ts-loader'
+                        loader: 'ts-loader',
+                        options: {
+                            compilerOptions: {
+                                module: 'commonjs'
+                            }
+                        }
                     }
                 ]
             }
         ]
+    },
+    infrastructureLogging: {
+        level: 'log'
     }
 };
+
 module.exports = config;

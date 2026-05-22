@@ -42,6 +42,7 @@ export class FileWatcher {
 
         if (this.watcher === undefined) {
             this.watcher = fs.watch(this.file.path, { recursive: this.recursive }, (event, filename) => {
+                if (!filename) { return; }
                 switch (event) {
                     case 'rename':
                         if (this.OnRename) {

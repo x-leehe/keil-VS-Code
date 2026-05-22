@@ -1,6 +1,6 @@
-# Keil Assistant
+# keil VS Code
 
-## 此插件已不再更新，如有需要，请下载源码自行编译后使用
+> **Keil 大战代码** 🥊 — VS Code 上的 Keil 辅助工具
 
 [![](https://vsmarketplacebadge.apphb.com/version/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)      [![](https://vsmarketplacebadge.apphb.com/installs/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)     [![](https://vsmarketplacebadge.apphb.com/downloads/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)     [![](https://vsmarketplacebadge.apphb.com/rating/CL.keil-assistant.svg)](https://marketplace.visualstudio.com/items?itemName=CL.keil-assistant)
 
@@ -12,9 +12,17 @@ vscode 上的 Keil 辅助工具，与 c/c++ 插件配合使用.
 
 能够为 Keil 项目提供 语法高亮、代码片段 的功能，并支持对 keil 项目进行 编译、下载。
 
-**仅支持 Keil uVison 5 及以上版本**  
+**仅支持 Keil uVison 5 及以上版本（现在应该没人用比这个更古老的版本了吧……）**  
 
-**仅支持 Windows 平台**
+**仅支持 Windows 平台（Linux/MacOS推荐使用[Embedded IDE](https://github.com/github0null/eide)）**
+
+> 碎碎念：EIDE功能比我这个插件更强大，如果你有专业开发需求，推荐用那个。
+
+**原项目已经不再维护了，有问题不要在原项目提Issue！**
+
+**原项目已经不再维护了，有问题不要在原项目提Issue！**
+
+**原项目已经不再维护了，有问题不要在原项目提Issue！**
 
 ![preview](./res/preview/preview.png)
 
@@ -35,7 +43,7 @@ vscode 上的 Keil 辅助工具，与 c/c++ 插件配合使用.
 
 1. 安装 C/C++ 插件
 >
-2. 进入 Keil-Assistant 插件设置，设置好 keil 可执行文件 UV4.exe 的绝对路径
+2. 进入 keil VS Code 插件设置，设置好 keil 可执行文件 UV4.exe 的绝对路径
  
  ![setting](./res/preview/setting.png)
 
@@ -105,4 +113,4 @@ vscode 上的 Keil 辅助工具，与 c/c++ 插件配合使用.
 
 - [论坛: https://discuss.em-ide.com/t/keil-assistant](https://discuss.em-ide.com/t/keil-assistant)
 
-- [Github Issue: https://github.com/github0null/keil-assistant/issues](https://github.com/github0null/keil-assistant/issues)
+- [Github Issue: https://github.com/x-leehe/keil-VS-Code/issues](https://github.com/x-leehe/keil-VS-Code/issues)

@@ -75,6 +75,18 @@ export class ResourceManager {
         return this.getAppConfig().get<string[]>('Project.FileLocationList') || [];
     }
 
+    getPackAndGoAuthor(): string {
+        return this.getAppConfig().get<string>('PackAndGo.Author') || '';
+    }
+
+    getPackAndGoNamePattern(): string {
+        return this.getAppConfig().get<string>('PackAndGo.NamePattern') || '${project}_${date}_${time}';
+    }
+
+    getPackAndGoTemplatePath(): string {
+        return this.getAppConfig().get<string>('PackAndGo.TemplatePath') || '';
+    }
+
     getIconByName(name: string): string | undefined {
         return this.iconMap.get(name);
     }
