@@ -3,10 +3,10 @@
     "displayName": "%keil-assistant.displayName%",
     "description": "%keil-assistant.description%",
     "version": "1.7.0",
-    "publisher": "cl",
+    "publisher": "x-leehe",
     "author": {
-        "name": "cl",
-        "email": "2584456014@qq.com"
+        "name": "x-leehe",
+        "email": "x-leehe@outlook.com"
     },
     "keywords": [
         "keil",
