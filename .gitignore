@@ -6,4 +6,4 @@ test
 *.vsix
 dist
 package-lock.json
-claude-init.ps1
+*claude*
