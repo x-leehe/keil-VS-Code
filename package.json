@@ -2,7 +2,7 @@
     "name": "keil-assistant",
     "displayName": "%keil-assistant.displayName%",
     "description": "%keil-assistant.description%",
-    "version": "1.7.0",
+    "version": "1.7.0-fix1",
     "publisher": "x-leehe",
     "author": {
         "name": "x-leehe",
@@ -116,12 +116,12 @@
             {
                 "command": "project.build",
                 "title": "%cmd.project.build.title%",
-                "icon": "$(check-all)"
+                "icon": "$(check)"
             },
             {
                 "command": "project.rebuild",
                 "title": "%cmd.project.rebuild.title%",
-                "icon": "$(check)"
+                "icon": "$(check-all)"
             },
             {
                 "command": "project.download",
@@ -201,6 +201,21 @@
                 "command": "project.deleteFile",
                 "title": "%cmd.project.deleteFile.title%",
                 "icon": "$(trash)"
+            },
+            {
+                "command": "project.toggleFileInclude",
+                "title": "%cmd.project.toggleFileInclude.title%",
+                "icon": "$(circle-slash)"
+            },
+            {
+                "command": "project.deleteGroup",
+                "title": "%cmd.project.deleteGroup.title%",
+                "icon": "$(trash)"
+            },
+            {
+                "command": "project.toggleGroupInclude",
+                "title": "%cmd.project.toggleGroupInclude.title%",
+                "icon": "$(circle-slash)"
             },
             {
                 "command": "project.packAndGo",
@@ -365,6 +380,16 @@
                     "when": "viewItem == FileGroup"
                 },
                 {
+                    "command": "project.toggleGroupInclude",
+                    "group": "6_include",
+                    "when": "viewItem == FileGroup"
+                },
+                {
+                    "command": "project.deleteGroup",
+                    "group": "7_delete",
+                    "when": "viewItem == FileGroup"
+                },
+                {
                     "command": "item.copyValue",
                     "group": "inline",
                     "when": "viewItem == Source"
@@ -382,6 +407,11 @@
                 {
                     "command": "project.deleteFile",
                     "group": "2_build@3",
+                    "when": "viewItem == Source"
+                },
+                {
+                    "command": "project.toggleFileInclude",
+                    "group": "2_build@4",
                     "when": "viewItem == Source"
                 },
                 {

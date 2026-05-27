@@ -86,6 +86,7 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
                 this.currentActiveProject.active();
             }
 
+            vscode.commands.executeCommand('setContext', 'keilShowHeaderDeps', true);
             this.updateView();
 
             // 通过钩子通知外部
@@ -126,6 +127,7 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
             this.currentActiveProject?.deactive();
             this.currentActiveProject = project;
             this.currentActiveProject?.active();
+            vscode.commands.executeCommand('setContext', 'keilShowHeaderDeps', true);
             this.updateView();
         }
     }
@@ -655,7 +657,7 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         vscode.window.showTextDocument(doc);
     }
 
-    /** 在 FileGroup 或 Target 下新建子文件夹 */
+    /** 在 FileGroup 或 Target 下新建子文件夹，同时写入 uvproj 元文件 */
     async addFolderToGroup(item: IView): Promise<void> {
         const prj = this.prjList.get(item.prjID);
         if (!prj) {
@@ -681,8 +683,17 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         }
 
         fs.mkdirSync(folderPath, { recursive: true });
+
+        // 写入 uvproj 元文件：为所有 Target 添加新的 Group
+        try {
+            await this.addGroupToUvproj(prj, folderName);
+            vscode.window.showInformationMessage(t('pe.addGroup.created', folderName));
+        } catch (err) {
+            vscode.window.showErrorMessage(t('pe.template.failed', (err as Error).message));
+        }
+
+        try { await prj.onReload(); } catch { /* ignore */ }
         this.updateView();
-        vscode.window.showInformationMessage(t('pe.addFolder.created', folderName));
     }
 
     /** 导入外部文件到指定 FileGroup */
@@ -843,6 +854,216 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
         fs.writeFileSync(prj.uvprjFile.path, builder.buildObject(doc), 'utf-8');
     }
 
+    /** 向 uvproj XML 中所有 Target 添加一个新的空 Group */
+    private async addGroupToUvproj(prj: KeilProject, groupName: string): Promise<void> {
+        const parser = new xml2js.Parser({ explicitArray: false });
+        const uvContent = fs.readFileSync(prj.uvprjFile.path, 'utf-8');
+        const doc = await parser.parseStringPromise(uvContent);
+
+        const targets = doc['Project']['Targets']['Target'];
+        const targetList = Array.isArray(targets) ? targets : [targets];
+
+        for (const target of targetList) {
+            if (!target['Groups']) {
+                target['Groups'] = {};
+            }
+            let groups = target['Groups']['Group'];
+            if (!groups) {
+                groups = [];
+            } else if (!Array.isArray(groups)) {
+                groups = [groups];
+            }
+
+            // 检查是否已存在同名 Group
+            const exists = groups.some((g: any) => g['GroupName'] === groupName);
+            if (!exists) {
+                groups.push({
+                    GroupName: groupName,
+                    Files: {}
+                });
+            }
+            target['Groups']['Group'] = groups;
+        }
+
+        const builder = new xml2js.Builder({
+            xmldec: { version: '1.0', encoding: 'UTF-8', standalone: false },
+            renderOpts: { pretty: true, indent: '  ', newline: '\n' }
+        });
+        fs.writeFileSync(prj.uvprjFile.path, builder.buildObject(doc), 'utf-8');
+    }
+
+    /** 从所有 Target 中删除一个文件组 */
+    async deleteGroup(item: IView): Promise<void> {
+        const prj = this.prjList.get(item.prjID);
+        if (!prj) {
+            vscode.window.showErrorMessage(t('pe.projectNotFound'));
+            return;
+        }
+
+        const groupName = item.label;
+        const confirm = await vscode.window.showWarningMessage(
+            t('pe.deleteGroup.confirm', groupName),
+            { modal: true },
+            t('pe.btn.delete'), t('pe.btn.cancel')
+        );
+        if (confirm !== t('pe.btn.delete')) { return; }
+
+        try {
+            const parser = new xml2js.Parser({ explicitArray: false });
+            const uvContent = fs.readFileSync(prj.uvprjFile.path, 'utf-8');
+            const doc = await parser.parseStringPromise(uvContent);
+
+            const targets = doc['Project']['Targets']['Target'];
+            const targetList = Array.isArray(targets) ? targets : [targets];
+            for (const target of targetList) {
+                if (!target['Groups']) { continue; }
+                let groups = target['Groups']['Group'];
+                if (!groups) { continue; }
+                if (!Array.isArray(groups)) { groups = [groups]; }
+                target['Groups']['Group'] = groups.filter((g: any) => g['GroupName'] !== groupName);
+            }
+
+            const builder = new xml2js.Builder({
+                xmldec: { version: '1.0', encoding: 'UTF-8', standalone: false },
+                renderOpts: { pretty: true, indent: '  ', newline: '\n' }
+            });
+            fs.writeFileSync(prj.uvprjFile.path, builder.buildObject(doc), 'utf-8');
+
+            await prj.onReload();
+            this.updateView();
+            vscode.window.showInformationMessage(t('pe.deleteGroup.done', groupName));
+        } catch (err) {
+            vscode.window.showErrorMessage(t('pe.toggleGroupInclude.failed', (err as Error).message));
+        }
+    }
+
+    /** 切换文件组的 IncludeInBuild 状态（排除/恢复整个组参与编译） */
+    async toggleGroupInclude(item: IView): Promise<void> {
+        const prj = this.prjList.get(item.prjID);
+        if (!prj) {
+            vscode.window.showErrorMessage(t('pe.projectNotFound'));
+            return;
+        }
+
+        const groupName = item.label;
+        try {
+            const parser = new xml2js.Parser({ explicitArray: false });
+            const uvContent = fs.readFileSync(prj.uvprjFile.path, 'utf-8');
+            const doc = await parser.parseStringPromise(uvContent);
+
+            const targets = doc['Project']['Targets']['Target'];
+            const targetList = Array.isArray(targets) ? targets : [targets];
+            let newState = false;
+
+            for (const target of targetList) {
+                if (!target['Groups']) { continue; }
+                let groups = target['Groups']['Group'];
+                if (!groups) { continue; }
+                if (!Array.isArray(groups)) { groups = [groups]; }
+
+                const group = groups.find((g: any) => g['GroupName'] === groupName);
+                if (!group) { continue; }
+
+                if (!group['GroupOption']) {
+                    group['GroupOption'] = { CommonProperty: {} };
+                }
+                if (!group['GroupOption']['CommonProperty']) {
+                    group['GroupOption']['CommonProperty'] = {};
+                }
+                const current = group['GroupOption']['CommonProperty']['IncludeInBuild'];
+                const newValue = current === '0' ? '1' : '0';
+                group['GroupOption']['CommonProperty']['IncludeInBuild'] = newValue;
+                newState = newValue === '1';
+            }
+
+            const builder = new xml2js.Builder({
+                xmldec: { version: '1.0', encoding: 'UTF-8', standalone: false },
+                renderOpts: { pretty: true, indent: '  ', newline: '\n' }
+            });
+            fs.writeFileSync(prj.uvprjFile.path, builder.buildObject(doc), 'utf-8');
+
+            await prj.onReload();
+            this.updateView();
+
+            if (newState) {
+                vscode.window.showInformationMessage(t('pe.toggleGroupInclude.included', groupName));
+            } else {
+                vscode.window.showInformationMessage(t('pe.toggleGroupInclude.excluded', groupName));
+            }
+        } catch (err) {
+            vscode.window.showErrorMessage(t('pe.toggleGroupInclude.failed', (err as Error).message));
+        }
+    }
+
+    /** 切换文件的 IncludeInBuild 状态（排除/恢复编译） */
+    async toggleFileInclude(item: IView): Promise<void> {
+        const source = item as unknown as Source;
+        if (!source || !source.file) {
+            return;
+        }
+
+        const prj = this.prjList.get(item.prjID);
+        if (!prj) {
+            vscode.window.showErrorMessage(t('pe.projectNotFound'));
+            return;
+        }
+
+        try {
+            const parser = new xml2js.Parser({ explicitArray: false });
+            const uvContent = fs.readFileSync(prj.uvprjFile.path, 'utf-8');
+            const doc = await parser.parseStringPromise(uvContent);
+
+            const targets = doc['Project']['Targets']['Target'];
+            const targetList = Array.isArray(targets) ? targets : [targets];
+            const fileName = source.file.name;
+
+            let newState = false;
+
+            for (const target of targetList) {
+                const groups = target['Groups']?.['Group'];
+                const groupList = Array.isArray(groups) ? groups : (groups ? [groups] : []);
+                for (const group of groupList) {
+                    if (!group['Files']) { continue; }
+                    let fileList = group['Files']['File'];
+                    if (!fileList) { continue; }
+                    if (!Array.isArray(fileList)) { fileList = [fileList]; }
+
+                    for (const file of fileList) {
+                        if (file['FileName'] === fileName || file['FilePath']?.endsWith(fileName)) {
+                            if (!file['FileOption']) {
+                                file['FileOption'] = { CommonProperty: {} };
+                            }
+                            if (!file['FileOption']['CommonProperty']) {
+                                file['FileOption']['CommonProperty'] = {};
+                            }
+                            const current = file['FileOption']['CommonProperty']['IncludeInBuild'];
+                            const newValue = current === '0' ? '1' : '0';
+                            file['FileOption']['CommonProperty']['IncludeInBuild'] = newValue;
+                            newState = newValue === '1';
+                        }
+                    }
+                }
+            }
+
+            const builder = new xml2js.Builder({
+                xmldec: { version: '1.0', encoding: 'UTF-8', standalone: false },
+                renderOpts: { pretty: true, indent: '  ', newline: '\n' }
+            });
+            fs.writeFileSync(prj.uvprjFile.path, builder.buildObject(doc), 'utf-8');
+
+            await prj.onReload();
+            this.updateView();
+
+            if (newState) {
+                vscode.window.showInformationMessage(t('pe.toggleFileInclude.included', fileName));
+            } else {
+                vscode.window.showInformationMessage(t('pe.toggleFileInclude.excluded', fileName));
+            }
+        } catch (err) {
+            vscode.window.showErrorMessage(t('pe.toggleFileInclude.failed', (err as Error).message));
+        }
+    }
+
     /** 切换头文件依赖关系显示 */
     setShowHeaderDeps(prjID: string, show: boolean): void {
         const prj = this.prjList.get(prjID);
@@ -862,7 +1083,25 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
                     }
                 }
             }
+            vscode.commands.executeCommand('setContext', 'keilShowHeaderDeps', show);
             this.updateView();
+        }
+    }
+
+    /** 切换头文件依赖关系显示（根据当前状态反转） */
+    toggleHeaderDeps(prjID: string): void {
+        const prj = this.prjList.get(prjID);
+        if (prj) {
+            const targets = prj.getTargets();
+            // 检查当前是否已显示：看第一个 target 的第一个 group 的第一个文件是否有 children
+            let currentlyShown = false;
+            if (targets.length > 0) {
+                const fGroups = targets[0].getChildViews() as FileGroup[] | undefined;
+                if (fGroups && fGroups.length > 0 && fGroups[0].sources.length > 0) {
+                    currentlyShown = fGroups[0].sources[0].children !== undefined;
+                }
+            }
+            this.setShowHeaderDeps(prjID, !currentlyShown);
         }
     }
 
@@ -1085,11 +1324,19 @@ export class ProjectExplorer implements vscode.TreeDataProvider<IView> {
     }
 
     getTreeItem(element: IView): vscode.TreeItem {
-        const res = new vscode.TreeItem(element.label);
+        // 被排除编译的文件/组：添加 [已排除] 前缀
+        let label: string = element.label;
+        if (element instanceof Source && !element.enable) {
+            label = t('pe.label.excluded', element.label);
+        } else if (element instanceof FileGroup && element.excluded) {
+            label = t('pe.label.excluded', element.label);
+        }
+
+        const collapsible = element.getChildViews() === undefined ?
+            vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed;
+        const res = new vscode.TreeItem(label, collapsible);
         res.contextValue = element.contextVal;
         res.tooltip = element.tooltip;
-        res.collapsibleState = element.getChildViews() === undefined ?
-            vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed;
 
         if (element instanceof Source) {
             res.command = {

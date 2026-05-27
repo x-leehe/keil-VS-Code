@@ -89,12 +89,14 @@ export class FileGroup implements IView {
     icons?: { light: string; dark: string };
 
     sources: Source[];
+    readonly excluded: boolean;
 
     constructor(pID: string, gName: string, disabled: boolean) {
         this.label = gName;
         this.prjID = pID;
         this.sources = [];
         this.tooltip = gName;
+        this.excluded = disabled;
         const iconName = disabled ? 'FolderExclude_32x' : 'Folder_32x';
         this.icons = { light: iconName, dark: iconName };
     }

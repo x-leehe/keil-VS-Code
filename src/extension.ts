@@ -76,6 +76,13 @@ export function activate(context: vscode.ExtensionContext) {
     subscriber.push(vscode.commands.registerCommand('project.switch', (item?: IView) => prjExplorer.switchTargetByProject(item)));
     subscriber.push(vscode.commands.registerCommand('project.active', (item: IView) => prjExplorer.activeProject(item)));
 
+    // 切换文件 IncludeInBuild 状态
+    subscriber.push(vscode.commands.registerCommand('project.toggleFileInclude', (item: IView) => prjExplorer.toggleFileInclude(item)));
+
+    // 文件组操作
+    subscriber.push(vscode.commands.registerCommand('project.deleteGroup', (item: IView) => prjExplorer.deleteGroup(item)));
+    subscriber.push(vscode.commands.registerCommand('project.toggleGroupInclude', (item: IView) => prjExplorer.toggleGroupInclude(item)));
+
     // ====== Keil 设置侧边栏命令 ======
     subscriber.push(vscode.commands.registerCommand('keilSettings.edit', async (itemData: SettingItem | any) => {
         // 从右键菜单或双击触发时，itemData 是 SettingItem 树节点
@@ -151,8 +158,9 @@ export function activate(context: vscode.ExtensionContext) {
     subscriber.push(vscode.commands.registerCommand('project.deleteFile', async (item: IView) => { await prjExplorer.deleteFile(item); }));
 
     // 显示/隐藏头文件依赖
-    subscriber.push(vscode.commands.registerCommand('project.toggleHeaderDeps', (item: IView) => prjExplorer.setShowHeaderDeps(item.prjID, true)));
+    subscriber.push(vscode.commands.registerCommand('project.showHeaderDeps', (item: IView) => prjExplorer.setShowHeaderDeps(item.prjID, true)));
     subscriber.push(vscode.commands.registerCommand('project.hideHeaderDeps', (item: IView) => prjExplorer.setShowHeaderDeps(item.prjID, false)));
+    subscriber.push(vscode.commands.registerCommand('project.toggleHeaderDeps', (item: IView) => prjExplorer.toggleHeaderDeps(item.prjID)));
     subscriber.push(vscode.commands.registerCommand('project.toggleFileHeaderDeps', (item: IView) => prjExplorer.toggleFileHeaderDeps(item)));
     subscriber.push(vscode.commands.registerCommand('project.toggleGroupHeaderDeps', (item: IView) => prjExplorer.toggleGroupHeaderDeps(item)));
 

@@ -106,6 +106,16 @@ const zh: MessageDict = {
     'pe.deleteFile.confirm': '确定要删除文件 "{0}" 吗？\n此操作将从工程中移除引用（不会删除磁盘文件）。',
     'pe.deleteFile.btn': '删除引用',
     'pe.deleteFile.done': '已从工程中移除: {0}',
+    'pe.toggleFileInclude.excluded': '已排除文件(不参与编译): {0}',
+    'pe.toggleFileInclude.included': '已恢复文件(参与编译): {0}',
+    'pe.label.excluded': '[已排除]{0}',
+    'pe.toggleFileInclude.failed': '切换文件包含状态失败: {0}',
+    'pe.addGroup.created': '已添加工程组: {0}',
+    'pe.deleteGroup.confirm': '确定要删除文件组 "{0}" 吗？\n将从所有 Target 中移除此组及其文件引用。',
+    'pe.deleteGroup.done': '已删除文件组: {0}',
+    'pe.toggleGroupInclude.excluded': '已排除文件组(不参与编译): {0}',
+    'pe.toggleGroupInclude.included': '已恢复文件组(参与编译): {0}',
+    'pe.toggleGroupInclude.failed': '切换文件组包含状态失败: {0}',
 
     // ---- KeilProject.ts ----
     'kp.log.init': '[info] Log at : {0}\r\n',
@@ -272,6 +282,16 @@ const en: MessageDict = {
     'pe.deleteFile.confirm': 'Are you sure you want to remove "{0}"?\nThis will only remove the reference from the project (not delete the file on disk).',
     'pe.deleteFile.btn': 'Remove Reference',
     'pe.deleteFile.done': 'Removed from project: {0}',
+    'pe.toggleFileInclude.excluded': 'File excluded from build: {0}',
+    'pe.toggleFileInclude.included': 'File restored to build: {0}',
+    'pe.label.excluded': '[Excluded]{0}',
+    'pe.toggleFileInclude.failed': 'Failed to toggle file include: {0}',
+    'pe.addGroup.created': 'Project group added: {0}',
+    'pe.deleteGroup.confirm': 'Are you sure you want to remove group "{0}"?\nThis will remove the group and its file references from all Targets.',
+    'pe.deleteGroup.done': 'Group removed: {0}',
+    'pe.toggleGroupInclude.excluded': 'Group excluded from build: {0}',
+    'pe.toggleGroupInclude.included': 'Group restored to build: {0}',
+    'pe.toggleGroupInclude.failed': 'Failed to toggle group include: {0}',
 
     // ---- KeilProject.ts ----
     'kp.log.init': '[info] Log at : {0}\r\n',

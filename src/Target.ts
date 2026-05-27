@@ -133,7 +133,7 @@ export abstract class Target implements IView {
         const sysIncludes = this.getSystemIncludes(this.targetDOM);
 
         this.includes.clear();
-        let incList = incListStr.split(';');
+        let incList = incListStr.split(/[;,]/);
         if (sysIncludes) {
             incList = incList.concat(sysIncludes);
         }
@@ -226,14 +226,6 @@ export abstract class Target implements IView {
         args.push('-o', this.uv4LogFile.path);
         args = args.concat(commands);
 
-        const isCmd = /cmd.exe$/i.test(process.env.ComSpec || 'cmd.exe');
-        const quote = isCmd ? '"' : '\'';
-        const invokePrefix = isCmd ? '' : '& ';
-        const cmdPrefixSuffix = isCmd ? '"' : '';
-
-        let commandLine = invokePrefix + this.quoteString(resManager.getBuilderExe(), quote) + ' ';
-        commandLine += args.map((arg: string) => { return this.quoteString(arg, quote); }).join(' ');
-
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             const task = new vscode.Task(
                 { type: 'keil-task' },
@@ -241,7 +233,7 @@ export abstract class Target implements IView {
                 name,
                 'shell'
             );
-            task.execution = new vscode.ShellExecution(cmdPrefixSuffix + commandLine + cmdPrefixSuffix);
+            task.execution = new vscode.ShellExecution(resManager.getBuilderExe(), args);
             task.isBackground = false;
             task.problemMatchers = this.getProblemMatcher();
             task.presentationOptions = {
@@ -251,6 +243,13 @@ export abstract class Target implements IView {
             };
             vscode.tasks.executeTask(task);
         } else {
+            const isCmd = /cmd.exe$/i.test(process.env.ComSpec || 'cmd.exe');
+            const quote = isCmd ? '"' : '\'';
+            const invokePrefix = isCmd ? '' : '& ';
+
+            let commandLine = invokePrefix + this.quoteString(resManager.getBuilderExe(), quote) + ' ';
+            commandLine += args.map((arg: string) => { return this.quoteString(arg, quote); }).join(' ');
+
             const index = vscode.window.terminals.findIndex((ter: vscode.Terminal) => {
                 return ter.name === name;
             });
